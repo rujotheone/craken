@@ -40,7 +40,7 @@ hi
 
 from random import randint
 from os import _exit
-from hashlib import md5, sha1, sha224, sha256, sha384, sha512
+import hashlib
 from sys import stdout, argv
 from time import sleep
 from atexit import register
@@ -91,134 +91,18 @@ class brute_force:
 			return bool(True)
 		return bool(False)
 
-	def encode_sha256(self):
-		self.dernier_mot_de_passe_hashe = sha256(self.dernier_mot_de_passe).hexdigest()
+	def encode(self, encryption):
+		self.dernier_mot_de_passe_hashe = getattr(hashlib, encryption)(self.dernier_mot_de_passe).hexdigest()
 		return self.dernier_mot_de_passe_hashe
 
-	def encode_md5(self):
-		self.dernier_mot_de_passe_hashe = md5(self.dernier_mot_de_passe).hexdigest()
-		return self.dernier_mot_de_passe_hashe
-
-	def encode_sha1(self):
-		self.dernier_mot_de_passe_hashe = sha1(self.dernier_mot_de_passe).hexdigest()
-		return self.dernier_mot_de_passe_hashe
-
-	def encode_sha384(self):
-		self.dernier_mot_de_passe_hashe = sha384(self.dernier_mot_de_passe).hexdigest()
-		return self.dernier_mot_de_passe_hashe
-
-	def encode_sha512(self):
-		self.dernier_mot_de_passe_hashe = sha512(self.dernier_mot_de_passe).hexdigest()
-		return self.dernier_mot_de_passe_hashe
-
-	def encode_sha224(self):
-		self.dernier_mot_de_passe_hashe = sha224(self.dernier_mot_de_passe).hexdigest()
-		return self.dernier_mot_de_passe_hashe
-
-def crack_sha256(hash_password):
+def crack(hash_password, encryption):
 	brute = brute_force(hash_password)
 	try:
 		while (True):
 			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
 					brute.nombre_de_carateres += 1
 			brute.new()
-			brute.encode_sha256()
-			if (brute.test()):
-				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
-	except KeyboardInterrupt:
-		sleep(1)
-		exit()
-
-def crack_md5(hash_password):
-	brute = brute_force(hash_password)
-	try:
-		while (True):
-			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
-					brute.nombre_de_carateres += 1
-			brute.new()
-			brute.encode_md5()
-			if (brute.test()):
-				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
-	except KeyboardInterrupt:
-		sleep(1)
-		exit()
-
-def crack_sha224(hash_password):
-	brute = brute_force(hash_password)
-	try:
-		while (True):
-			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
-					brute.nombre_de_carateres += 1
-			brute.new()
-			brute.encode_sha224()
-			if (brute.test()):
-				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
-	except KeyboardInterrupt:
-		sleep(1)
-		exit()
-
-def crack_sha1(hash_password):
-	brute = brute_force(hash_password)
-	try:
-		while (True):
-			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
-					brute.nombre_de_carateres += 1
-			brute.new()
-			brute.encode_sha1()
-			if (brute.test()):
-				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
-	except KeyboardInterrupt:
-		sleep(1)
-		exit()
-
-def crack_sha512(hash_password):
-	brute = brute_force(hash_password)
-	try:
-		while (True):
-			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
-					brute.nombre_de_carateres += 1
-			brute.new()
-			brute.encode_sha512()
-			if (brute.test()):
-				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
-	except KeyboardInterrupt:
-		sleep(1)
-		exit()
-
-def crack_sha384(hash_password):
-	brute = brute_force(hash_password)
-	try:
-		while (True):
-			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
-					brute.nombre_de_carateres += 1
-			brute.new()
-			brute.encode_sha384()
-			if (brute.test()):
-				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
-	except KeyboardInterrupt:
-		sleep(1)
-		exit()
-
-def crack_sha384(hash_password):
-	brute = brute_force(hash_password)
-	try:
-		while (True):
-			if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
-					brute.nombre_de_carateres += 1
-			brute.new()
-			brute.encode_sha384()
+			brute.encode(encryption)
 			if (brute.test()):
 				return brute.dernier_mot_de_passe
 			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
@@ -239,18 +123,8 @@ def main():
 	except IndexError:
 		encryption = raw_input("Encryption\n(md5, sha1, sha224, sha256, sha384, sha512)\n: ")
 		password = raw_input("Data to break: ")
-	if (encryption == "md5"):
-		print("\nFound: \n%s" % crack_md5(password))
-	elif (encryption == "sha1"):
-		print("\nFound: \n%s" % crack_sha1(password))
-	elif (encryption == "sha224"):
-		print("\nFound: \n%s" % crack_sha224(password))
-	elif (encryption == "sha256"):
-		print("\nFound: \n%s" % crack_sha256(password))
-	elif (encryption == "sha384"):
-		print("\nFound: \n%s" % crack_sha384(password))
-	elif (encryption == "sha512"):
-		print("\nFound: \n%s" % crack_sha512(password))
+	if (encryption in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']):
+		print("\nFound: \n%s" % crack(password, encryption))
 	else:
 		print("\nEncryption not found")
 	_exit(0)
