@@ -30,8 +30,10 @@
 #  MA 02110-1301, USA.
 
 '''
-Example:
+PyCracker
 
+This lib is for cracking encryptions like md5 sha...
+Example:
 [mou@mou libs]$ python brute_force.py sha1 c22b5f9178342609428d6f51b2c5af4c0bde6a42
 Tested: 14055 passwords searching now with 2 chars
 Found: 
