@@ -8,3 +8,4 @@
 
 
 This is a simple hash code breaker wrote in python using hashlib
+to crack: md5, sha1, sha224, sha256, sha384, sha512
