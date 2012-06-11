@@ -29,7 +29,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 
-'''
+__doc__ = '''
 PyCracker
 
 This lib is for cracking encryptions like md5 sha...
@@ -39,6 +39,8 @@ Tested: 14055 passwords searching now with 2 chars
 Found: 
 hi
 '''
+
+__all__ = ('brute_force', 'crack', 'main')
 
 from random import randint
 from os import _exit
@@ -82,6 +84,17 @@ class brute_force:
 			self.dernier_mot_de_passe = self.dernier_mot_de_passe + chr(randint(self.ascii_debut, self.ascii_fin))
 		self.nombre_de_mots += 1
 		return self.dernier_mot_de_passe
+		
+	def generate(self, encryption, nombre_de_carateres=int()):
+		'''
+		could be used to make library of passwords with hash to avoid wasting time by rehashing at every crack
+		example:
+		>>> pycracker.brute_force().generate("md5", 5)#5 is the lenght of desired password "md5" is the encryption you want
+		['D0!Zc', '807bacbbe4c2fea3723e9f1858fd484c']#return a list with generated pass and hashed generated pass
+		'''
+		if nombre_de_carateres:
+			self.nombre_de_carateres = nombre_de_carateres
+		return [self.new(), self.encode(encryption)]
 	
 			
 	def test(self):
@@ -94,10 +107,18 @@ class brute_force:
 		return bool(False)
 
 	def encode(self, encryption):
+		'''md5, sha1, sha224, sha256, sha384, sha512'''
 		self.dernier_mot_de_passe_hashe = getattr(hashlib, encryption)(self.dernier_mot_de_passe).hexdigest()
 		return self.dernier_mot_de_passe_hashe
 
-def crack(hash_password, encryption):
+def crack(encryption, hash_password):
+	'''
+	>>> import pycracker
+	>>> print "\n" + pycracker.crack("md5", "49f68a5c8493ec2c0bf489821c21fc3b")
+	Tested: 5500 passwords searching now with 2 chars
+	hi
+	'''
+	
 	brute = brute_force(hash_password)
 	try:
 		while (True):
@@ -118,15 +139,23 @@ def quitter():
 	_exit(0)
 
 def main():
+	'''usage:
+	[mou@mou pycracker]$ python pycracker.py sha1 c22b5f9178342609428d6f51b2c5af4c0bde6a42
+	Tested: 10968 passwords searching now with 2 chars
+	Found: 
+	hi
+	[mou@mou pycracker]$
+	'''
 	register(quitter)
 	try:
 		encryption = argv[1]
 		password = argv[2]
 	except IndexError:
+		print("I also can run: python %s 'encryption' 'hashed password'\nexample: python pycracker.py %s c22b5f9178342609428d6f51b2c5af4c0bde6a42" % (argv[0], argv[0]))
 		encryption = raw_input("Encryption\n(md5, sha1, sha224, sha256, sha384, sha512)\n: ")
 		password = raw_input("Data to break: ")
 	if (encryption in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']):
-		print("\nFound: \n%s" % crack(password, encryption))
+		print("\nFound: \n%s" % crack(encryption, password))
 	else:
 		print("\nEncryption not found")
 	_exit(0)
