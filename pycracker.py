@@ -40,26 +40,25 @@ Found:
 hi
 '''
 
-__all__ = ('brute_force', 'crack', 'main')
+__all__ = ('brute_force', 'crack', 'make_library')
 
-from random import randint
-from os import _exit
 import hashlib
+from random import randint
+from os import _exit, mkdir
 from sys import stdout, argv
 from time import sleep
+from pickle import dump, load
 from atexit import register
 
 encryptions = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 
 class brute_force:
 	def __init__(self, mot_de_passe_a_trouver=str(), nombre_de_carateres_depart = int(1), caracteres_max=int(42)):
-		'''
-		Librairie de recherche de mots de passes encrypte
+		'''Librairie de recherche de mots de passes encrypte
 		Library for decrypting encrypted passwords
 		
 		Encryptions:
-		md5, sha1, sha224, sha256, sha384, sha512
-		'''
+		md5, sha1, sha224, sha256, sha384, sha512'''
 		self.ascii_debut = int(32)
 		self.ascii_fin = int(126)
 		self.nombre_de_mots = int()
@@ -75,10 +74,8 @@ class brute_force:
 		self.compteur = int(1)
 
 	def new(self):
-		'''
-		Creer un mot de passe possible
-		Create a new random word
-		'''
+		'''Creer un mot de passe possible
+		Create a new random word'''
 		self.dernier_mot_de_passe= str()
 		for lettre in range(self.nombre_de_carateres):
 			self.dernier_mot_de_passe = self.dernier_mot_de_passe + chr(randint(self.ascii_debut, self.ascii_fin))
@@ -86,22 +83,18 @@ class brute_force:
 		return self.dernier_mot_de_passe
 		
 	def generate(self, encryption, nombre_de_carateres=int()):
-		'''
-		could be used to make library of passwords with hash to avoid wasting time by rehashing at every crack
+		'''could be used to make library of passwords with hash to avoid wasting time by rehashing at every crack
 		example:
 		>>> pycracker.brute_force().generate("md5", 5)#5 is the lenght of desired password "md5" is the encryption you want
-		['D0!Zc', '807bacbbe4c2fea3723e9f1858fd484c']#return a list with generated pass and hashed generated pass
-		'''
+		['D0!Zc', '807bacbbe4c2fea3723e9f1858fd484c']#return a list with generated pass and hashed generated pass'''
 		if nombre_de_carateres:
 			self.nombre_de_carateres = nombre_de_carateres
 		return [self.new(), self.encode(encryption)]
 	
 			
 	def test(self):
-		'''
-		tester le dernier mot de passe qui doit deja etre hashe avec l option encode_...()
-		test the last password which need to be already hashed before using encode_...()
-		'''
+		'''tester le dernier mot de passe qui doit deja etre hashe avec l option encode_...()
+		test the last password which need to be already hashed before using encode_...()'''
 		if (self.mot_de_passe_a_trouver == self.dernier_mot_de_passe_hashe):
 			return bool(True)
 		return bool(False)
@@ -111,14 +104,73 @@ class brute_force:
 		self.dernier_mot_de_passe_hashe = getattr(hashlib, encryption)(self.dernier_mot_de_passe).hexdigest()
 		return self.dernier_mot_de_passe_hashe
 
+
+class brute_writer:
+	def __init__(self, encryption, nombre_de_carateres_depart=int(1)):
+		'''A tiny class to generate random passwords and hash it to write it out in files using pickle'''
+		self.brute = brute_force()
+		self.encryption = encryption.lower()
+		self.brute.nombre_de_caracteres = nombre_de_carateres_depart
+		self.tout_mots = dict()
+		self.compteur = int()
+		self.last_gen = list()
+
+	def __str__(self):
+		return self.brute.nombre_de_mots
+
+	def __del__(self):
+		self.on_save()
+
+	def on_save(self):
+		'''Save the pass'''
+		try:
+			mkdir('library')
+		except:
+			print("[*] dir already created")
+		file = open("library/%i%s%i.crack" % (randint(1, 10), self.encryption, self.brute.nombre_de_caracteres), "w+b")
+		dump(self.tout_mots, file)
+		file.close()
+		self.tout_mots = dict()
+		
+	def big_loop(self):
+		'''I think I should have called it main()'''
+		try:
+			while (True):
+				if (self.brute.puissances[self.brute.nombre_de_carateres-1] == self.brute.nombre_de_mots):
+						self.brute.nombre_de_carateres += 1
+				if (self.compteur >= 5000000):
+					#do a backup every x times
+					self.on_save()
+					self.compteur = int()
+					self.tout_mots = dict()
+				self.compteur += 1
+				self.last_gen = self.brute.generate(self.encryption)
+				self.tout_mots[self.last_gen[0]] = self.last_gen[1]
+				stdout.write("\rGenerating: %i" % self.brute.nombre_de_mots)
+				stdout.flush()
+		except KeyboardInterrupt:
+			try:
+				print
+				sleep(1)
+				self.big_loop()
+			except KeyboardInterrupt:
+				print "wait..."
+				self.__del__()
+
+def make_library(encryption, nombre_de_carateres_depart=int(1)):
+	'''generate random passwords and hash it to write it out in files using module'''
+	if (encryption in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']):
+		m = brute_writer(encryption, nombre_de_carateres_depart)
+		m.big_loop()
+	else:
+		print("Algorithm not found :(")
+		
+
 def crack(encryption, hash_password):
-	'''
-	>>> import pycracker
+	'''>>> import pycracker
 	>>> print "\n" + pycracker.crack("md5", "49f68a5c8493ec2c0bf489821c21fc3b")
 	Tested: 5500 passwords searching now with 2 chars
-	hi
-	'''
-	
+	hi'''
 	brute = brute_force(hash_password)
 	try:
 		while (True):
@@ -127,12 +179,12 @@ def crack(encryption, hash_password):
 			brute.new()
 			brute.encode(encryption)
 			if (brute.test()):
+				print
 				return brute.dernier_mot_de_passe
 			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
 			stdout.flush()
 	except KeyboardInterrupt:
-		sleep(1)
-		exit()
+		sleep(1)#to allow double CTRL+C to exit
 
 def quitter():
 	print("\nExitted before found any correspondance")
@@ -144,8 +196,7 @@ def main():
 	Tested: 10968 passwords searching now with 2 chars
 	Found: 
 	hi
-	[mou@mou pycracker]$
-	'''
+	[mou@mou pycracker]$'''
 	register(quitter)
 	try:
 		encryption = argv[1]
@@ -155,7 +206,7 @@ def main():
 		encryption = raw_input("Encryption\n(md5, sha1, sha224, sha256, sha384, sha512)\n: ")
 		password = raw_input("Data to break: ")
 	if (encryption in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']):
-		print("\nFound: \n%s" % crack(encryption, password))
+		print("\nFound: \n%s" % crack(encryption.lower(), password))
 	else:
 		print("\nEncryption not found")
 	_exit(0)
