@@ -49,6 +49,7 @@ from os import _exit, mkdir
 from sys import stdout, argv
 from time import sleep
 from pickle import dump, load
+from threading import Thread
 from atexit import register
 
 
@@ -180,6 +181,9 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
    to write it out in files using module
    '''
    m = brute_writer(encryption, nombre_de_carateres_depart)
+   if encryption not in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']:
+      print("Encryption not found")
+      _exit(0)
    while (True):
       try:
          if (m.brute.puissances[m.brute.nombre_de_carateres-1] == m.brute.nombre_de_mots):
@@ -193,8 +197,8 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
          if display:
             stdout.write("\rGenerating: %i" % len(m))
             stdout.flush()
-      except:
-         print
+      except KeyboardInterrupt:
+         print("Keyboard interrupt")
          m.on_save()
 
 def crack(encryption, hash_password, display=True):
@@ -205,6 +209,9 @@ def crack(encryption, hash_password, display=True):
    hi
    '''
    brute = brute_force(hash_password)
+   if encryption not in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']:
+      print("Encryption not found")
+      _exit(0)
    try:
       while (True):
          if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
@@ -216,10 +223,12 @@ def crack(encryption, hash_password, display=True):
             stdout.write("\rTested: %d passwords searching now with %d chars" % (len(brute), brute.nombre_de_carateres))
             stdout.flush()
    except KeyboardInterrupt:
+      print("\nKeyboard Interrupt")
       exit()
 
+
 def quitter():
-   print("\nExitted before found any correspondance")
+   print("Exitted before found any correspondance")
    _exit(0)
 
 def main():
@@ -232,28 +241,34 @@ def main():
    [mou@mou pycracker]$
    '''
    register(quitter)
+   __help__ = ('''
+craken.py : invalid options given
+Usage: python {0} [-c Crack a password]
+                        [-g generate a dict of passwords]
+                        [-h display this help]
+Example:
+   python {0} -c md5 'c268120ce3918b1264fe2c05143b5c4b'
+   '''.format(argv[0]))
    try:
-      choix = int(argv[1].replace("-", ""))-1
-      encryption = argv[2]
-      password = argv[3]
-   except IndexError:
-      print("I also can run: python %s 'option' 'encryption' 'hashed password'\nexample: python pycracker.py %s c22b5f9178342609428d6f51b2c5af4c0bde6a42" % (argv[0], argv[0]))
-      try:
-         choix = input("1: Crack a password\n2: Make a dictionary of passwords\n: 1 or 2 ? ")-1
-      except:
-         choix = 0
-      encryption = raw_input("Encryption\n(md5, sha1, sha224, sha256, sha384, sha512)\n: ")
-      if not choix:
-         password = raw_input("Data to break: ")
-   encryption = encryption.lower()
-   if (encryption in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']):
-      if choix:
-         make_dict(encryption)
+      if (argv[1].lower() == '-c'):
+         try:
+            print("\nFound: %s" % crack(argv[2].lower(), argv[3]))
+         except IndexError:
+            print("More arguements needed\n%s" % __help__)
+      elif (argv[1].lower() == '-g'):
+         try:
+            make_dict(argv[2].lower())
+         except IndexError:
+            print("More arguements needed\n%s" % __help__)
+      elif (argv[1].lower() == '-h'):
+         print(__help__)
       else:
-         print("\nFound: \n%s" % crack(encryption.lower(), password))
-   else:
-      print("\nEncryption not found")
-   _exit(0)
+         print("try: python %s -h" % argv[0])
+   except IndexError:
+      if (input("1. Generate a dictionary\n2. Crack a password\n: ") == 1):
+         make_dict(raw_input("Encryption\nmd5, sha1, sha224, sha256, sha384, sha512\n: "))
+      else:
+         print("Found: %s" % crack(raw_input("Encryption\nmd5, sha1, sha224, sha256, sha384, sha512\n: "), raw_input("Data to crack: ")))
 
 if __name__ == "__main__":
    print("""
@@ -285,6 +300,6 @@ sha512`o-o.o--    /o /      \o.o--..          ,,,o-o'o.--o:o:o,,..:oSHA256
  (o(               /o / 
   \o\.       ...-o'o /
     \o`o`-o'o o,o,--'
-      ```o--'''           
-      """)
+      ```o--''' """)
    main()
+   _exit(0)
