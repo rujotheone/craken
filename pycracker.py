@@ -85,11 +85,13 @@ class brute_force:
          self.nombre_de_carateres = nombre_de_caracteres
       return self.nombre_de_carateres
 
-   def search(self, encryption):
+   def one_search(self, encryption):
       '''Generate one random password and returns true if found'''
       self.new()
       self.encode(encryption)
-      return self.test()
+      if (self.mot_de_passe_a_trouver == self.dernier_mot_de_passe_hashe):
+         return True
+      return False
 
    def new(self):
       '''
@@ -113,14 +115,6 @@ class brute_force:
          self.nombre_de_carateres = nombre_de_carateres
       return [self.new(), self.encode(encryption)]
 
-   def test(self):
-      '''
-      tester le dernier mot de passe qui doit deja etre hashe avec l option encode_...()
-      test the last password which need to be already hashed before using encode_...()
-      '''
-      if (self.mot_de_passe_a_trouver == self.dernier_mot_de_passe_hashe):
-         return True
-      return False
 
    def encode(self, encryption):
       '''md5, sha1, sha224, sha256, sha384, sha512'''
@@ -162,7 +156,7 @@ class brute_writer:
          mkdir('library')
       except:
          print("[*] dir already created")
-      file = open("library/%s%i.crack" % (self.encryption, self.brute.nombre_de_caracteres), "w+b")
+      file = open("library/n%i_e%sc%i.crack" % (randint(1, 100), self.encryption, self.brute.nombre_de_caracteres), "w+b")
       dump(self.tout_mots, file)
       file.close()
       self.tout_mots = {}
@@ -202,9 +196,10 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
 
 def crack(encryption, hash_password, display=True):
    '''
+   return the password from a hash if found
    >>> import pycracker
    >>> print pycracker.crack("md5", "49f68a5c8493ec2c0bf489821c21fc3b")
-   Tested: 5500 passwords searching now with 2 chars
+   Tested: 3500 passwords searching now with 2 chars
    hi
    '''
    brute = brute_force(hash_password)
@@ -215,7 +210,7 @@ def crack(encryption, hash_password, display=True):
       while (True):
          if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
                brute.nombre_de_carateres += 1
-         if (brute.search(encryption)):
+         if (brute.one_search(encryption)):
             print
             return brute.dernier_mot_de_passe
          if display:
