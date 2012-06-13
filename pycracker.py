@@ -34,8 +34,8 @@ PyCracker
 
 This lib is for cracking encryptions like md5 sha...
 Example:
-[mou@mou libs]$ python brute_force.py sha1 c22b5f9178342609428d6f51b2c5af4c0bde6a42
-Tested: 14055 passwords searching now with 2 chars
+[mou@mou libs]$ python brute_force.py 1 sha1 c22b5f9178342609428d6f51b2c5af4c0bde6a42
+Tested: 1055 passwords searching now with 2 chars
 Found: 
 hi
 '''
@@ -72,16 +72,25 @@ class brute_force:
 		self.mot_de_passe_a_trouver = str(mot_de_passe_a_trouver)
 
 		while (self.compteur <= caracteres_max):
-			self.puissances.append(int(((self.ascii_fin-self.ascii_debut)**(self.compteur))*1.8))#you could change the 1.8 but you risk fail many words if you reduce it and if you increment it you will waste time
+			self.puissances.append(int(((self.ascii_fin-self.ascii_debut)**(self.compteur))*1.9))#you could change the 1.9 but you risk fail many words if you reduce it and if you increment it you will waste time
 			self.compteur += 1
 		self.compteur = int(1)
-		
+
+	def __len__(self):
+		return self.nombre_de_mots
+
+	def set_char(self, nombre_de_caracteres=int()):
+		'''a shortcut to change number of chars by generated words'''
+		if not nombre_de_caracteres:
+			self.nombre_de_carateres = nombre_de_caracteres
+		return self.nombre_de_carateres
+
 	def search(self, encryption):
 		'''Generate one random password and returns true if found'''
 		self.new()
 		self.encode(encryption)
 		return self.test()
-	
+
 	def new(self):
 		'''
 		Creer un mot de passe possible
@@ -92,7 +101,7 @@ class brute_force:
 			self.dernier_mot_de_passe = self.dernier_mot_de_passe + chr(randint(self.ascii_debut, self.ascii_fin))
 		self.nombre_de_mots += 1
 		return self.dernier_mot_de_passe
-		
+
 	def generate(self, encryption, nombre_de_carateres=int()):
 		'''
 		could be used to make library of passwords with hash to avoid wasting time by rehashing at every crack
@@ -103,8 +112,7 @@ class brute_force:
 		if nombre_de_carateres:
 			self.nombre_de_carateres = nombre_de_carateres
 		return [self.new(), self.encode(encryption)]
-	
-			
+
 	def test(self):
 		'''
 		tester le dernier mot de passe qui doit deja etre hashe avec l option encode_...()
@@ -133,6 +141,9 @@ class brute_writer:
 		self.tout_mots = dict()
 		self.compteur = int()
 		self.last_gen = list()
+	
+	def __len__(self):
+		return self.brute.nombre_de_mots
 
 	def __str__(self):
 		return self.brute.nombre_de_mots
@@ -140,6 +151,10 @@ class brute_writer:
 	def __del__(self):
 		'''Save before any exit'''
 		self.on_save()
+
+	def set_char(self, nombre_de_caracteres=int()):
+		if not nombre_de_caracteres:
+			self.brute.nombre_de_caracteres = nombre_de_caracteres
 
 	def on_save(self):
 		'''Save the pass'''
@@ -159,7 +174,7 @@ class brute_writer:
 		self.tout_mots[self.last_gen[0]] = self.last_gen[1]
 
 
-def make_dict(encryption, nombre_de_carateres_depart=int(1)):
+def make_dict(encryption, nombre_de_carateres_depart=int(1), display=True):
 	'''
 	generate random passwords and hash it 
 	to write it out in files using module
@@ -175,16 +190,17 @@ def make_dict(encryption, nombre_de_carateres_depart=int(1)):
 				m.compteur = int()
 				m.tout_mots = dict()
 			m.make(encryption)
-			stdout.write("\rGenerating: %i" % m.brute.nombre_de_mots)
-			stdout.flush()
+			if display:
+				stdout.write("\rGenerating: %i" % len(m))
+				stdout.flush()
 		except:
 			print
 			m.on_save()	
 
-def crack(encryption, hash_password):
+def crack(encryption, hash_password, display=True):
 	'''
 	>>> import pycracker
-	>>> print "\n" + pycracker.crack("md5", "49f68a5c8493ec2c0bf489821c21fc3b")
+	>>> print pycracker.crack("md5", "49f68a5c8493ec2c0bf489821c21fc3b")
 	Tested: 5500 passwords searching now with 2 chars
 	hi
 	'''
@@ -196,8 +212,9 @@ def crack(encryption, hash_password):
 			if (brute.search(encryption)):
 				print
 				return brute.dernier_mot_de_passe
-			stdout.write("\rTested: %d passwords searching now with %d chars" % (brute.nombre_de_mots, brute.nombre_de_carateres))
-			stdout.flush()
+			if display:
+				stdout.write("\rTested: %d passwords searching now with %d chars" % (len(brute), brute.nombre_de_carateres))
+				stdout.flush()
 	except KeyboardInterrupt:
 		exit()
 
@@ -208,7 +225,7 @@ def quitter():
 def main():
 	'''
 	usage:
-	[mou@mou pycracker]$ python pycracker.py sha1 c22b5f9178342609428d6f51b2c5af4c0bde6a42
+	[mou@mou pycracker]$ python pycracker.py sha1 1 c22b5f9178342609428d6f51b2c5af4c0bde6a42
 	Tested: 1032 passwords searching now with 2 chars
 	Found: 
 	hi
@@ -228,6 +245,7 @@ def main():
 		encryption = raw_input("Encryption\n(md5, sha1, sha224, sha256, sha384, sha512)\n: ")
 		if not choix:
 			password = raw_input("Data to break: ")
+	encryption = encryption.lower()
 	if (encryption in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']):
 		if choix:
 			make_dict(encryption)
