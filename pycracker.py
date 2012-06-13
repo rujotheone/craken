@@ -49,7 +49,6 @@ from os import _exit, mkdir
 from sys import stdout, argv
 from time import sleep
 from pickle import dump, load
-from threading import Thread
 from atexit import register
 
 
