@@ -220,6 +220,23 @@ def crack(encryption, hash_password, display=True):
       print("\nKeyboard Interrupt")
       exit()
 
+def crack_with_file(file_name, encryption, hash_pass):
+   brute = brute_force()
+   encryption = encryption.lower()
+   if encryption not in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']:
+      print("Encryption not found")
+      _exit(0)
+   try:
+      _file = open(file_name, "r")
+   except IOError:
+      return ("File: %s not found" % file_name)
+   _file.seek(0)
+   print("Cracking...")
+   for ligne in _file:
+      brute.dernier_mot_de_passe = ligne.replace("\n", "")
+      if brute.encode(encryption) == hash_pass:
+         return ligne.replace("\n", "")
+   print "Not found"
 
 def quitter():
    print("Exitted before found any correspondance")
@@ -237,11 +254,14 @@ def main():
    register(quitter)
    __help__ = ('''
 craken.py : invalid options given
-Usage: python {0} [-c Crack a password]
-                        [-g generate a dict of passwords]
-                        [-h display this help]
+Usage: python {0} [-c Crack a hash]
+                  [-g generate a dict of passwords]
+                  [-h display this help]
+                  [-f crack a hash using plain text file]
 Example:
-   python {0} -c md5 'c268120ce3918b1264fe2c05143b5c4b'
+   python {0} -c md5 "c268120ce3918b1264fe2c05143b5c4b"
+                  or
+   python {0} -f pass.txt md5 "c268120ce3918b1264fe2c05143b5c4b"
    '''.format(argv[0]))
    try:
       if (argv[1].lower() == '-c'):
@@ -254,16 +274,23 @@ Example:
             make_dict(argv[2].lower())
          except IndexError:
             print("More arguements needed\n%s" % __help__)
+      elif (argv[1].lower() == '-f'):
+         try:
+            print("Found: %s" % crack_with_file(argv[2], argv[3].lower(), argv[4]))
+         except IndexError:
+            print(__help__)
       elif (argv[1].lower() == '-h'):
          print(__help__)
       else:
          print("try: python %s -h" % argv[0])
    except IndexError:
-      if (input("1. Generate a dictionary\n2. Crack a password\n: ") == 1):
+      choix = input("1. Generate a dictionary\n2. Crack a password\n3. Crack a password using a file\n: ")
+      if (choix == 1):
          make_dict(raw_input("Encryption\nmd5, sha1, sha224, sha256, sha384, sha512\n: "))
-      else:
+      elif (choix == 2):
          print("Found: %s" % crack(raw_input("Encryption\nmd5, sha1, sha224, sha256, sha384, sha512\n: "), raw_input("Data to crack: ")))
-
+      else:
+         print("Found: %s" % crack_with_file(raw_input("File name: "), raw_input("Encryption to crack: ").lower(), raw_input("Hash to crack: ")))
 if __name__ == "__main__":
    print("""
                                               ,MD5
