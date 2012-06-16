@@ -153,12 +153,12 @@ class brute_writer:
       try:
          mkdir('library')
       except:
-         print("[*] dir already created")
+         print("\n[*] dir already created")
       file = open("library/dict%sc%i.crack" % (self.encryption, self.brute.nombre_de_caracteres), "a")
       file.write("\n".join(self.tout_mots))
       file.close()
       self.tout_mots = []
-      
+
    def make(self, encryption):
       ''''''
       self.compteur += 1
@@ -179,7 +179,7 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
       try:
          if (m.brute.puissances[m.brute.nombre_de_carateres-1] == m.brute.nombre_de_mots):
                m.brute.nombre_de_carateres += 1
-         if (m.compteur >= 500000):
+         if (m.compteur >= 50000):
             #do a backup every x times
             m.on_save()
             m.compteur = 0
@@ -294,10 +294,10 @@ Example:
          except IndexError:
             print(__help__)
       elif argv[1].lower() == '-d':
-		  try:
-			  print("Found: %s" % crack_with_dict(argv[2], argv[3]))
+                  try:
+                        print("Found: %s" % crack_with_dict(argv[2], argv[3]))
 		  except IndexError:
-			  print(__help__)
+                        print(__help__)
       elif (argv[1].lower() == '-h'):
          print(__help__)
       else:
