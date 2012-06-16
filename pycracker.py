@@ -47,9 +47,8 @@ import hashlib
 from random import randint
 from os import _exit, mkdir
 from sys import stdout, argv
-from time import sleep
-from pickle import dump, load
 from atexit import register
+from time import sleep
 
 
 class brute_force:
@@ -132,9 +131,8 @@ class brute_writer:
       self.brute = brute_force()
       self.encryption = encryption.lower()
       self.brute.nombre_de_caracteres = nombre_de_carateres_depart
-      self.tout_mots = {}
+      self.tout_mots = []
       self.compteur = 0
-      self.last_gen = []
    
    def __len__(self):
       return self.brute.nombre_de_mots
@@ -156,16 +154,16 @@ class brute_writer:
          mkdir('library')
       except:
          print("[*] dir already created")
-      file = open("library/n%i_e%sc%i.crack" % (randint(1, 100), self.encryption, self.brute.nombre_de_caracteres), "w+b")
-      dump(self.tout_mots, file)
+      file = open("library/dict%sc%i.crack" % (self.encryption, self.brute.nombre_de_caracteres), "a")
+      file.write("\n".join(self.tout_mots))
       file.close()
-      self.tout_mots = {}
+      self.tout_mots = []
       
    def make(self, encryption):
       ''''''
       self.compteur += 1
-      self.last_gen = self.brute.generate(encryption)
-      self.tout_mots[self.last_gen[0]] = self.last_gen[1]
+      self.tout_mots.append("\t".join(self.brute.generate(encryption)))
+
 
 
 def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
@@ -181,18 +179,19 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
       try:
          if (m.brute.puissances[m.brute.nombre_de_carateres-1] == m.brute.nombre_de_mots):
                m.brute.nombre_de_carateres += 1
-         if (m.compteur >= 5000000):
+         if (m.compteur >= 500000):
             #do a backup every x times
             m.on_save()
             m.compteur = 0
-            m.tout_mots = {}
+            m.tout_mots = []
          m.make(encryption)
          if display:
             stdout.write("\rGenerating: %i" % len(m))
             stdout.flush()
       except KeyboardInterrupt:
-         print("Keyboard interrupt")
+         print("\nKeyboard interrupt")
          m.on_save()
+         sleep(5)
 
 def crack(encryption, hash_password, display=True):
    '''
@@ -219,6 +218,16 @@ def crack(encryption, hash_password, display=True):
    except KeyboardInterrupt:
       print("\nKeyboard Interrupt")
       exit()
+
+def crack_with_dict(dict_name, to_crack):
+   try:
+		file = open(dict_name, "r")
+	except IOError:
+		print("File not found: %s" % dict_name)
+	for ligne in file:
+		if ligne[ligne.find("\t")+1:].replace("\n", "") == to_crack:
+			return ligne[:ligne.find("\t")]
+	return ''
 
 def crack_with_file(file_name, encryption, hash_pass):
    brute = brute_force()
@@ -257,11 +266,16 @@ craken.py : invalid options given
 Usage: python {0} [-c Crack a hash]
                   [-g generate a dict of passwords]
                   [-h display this help]
-                  [-f crack a hash using plain text file]
+                  [-f crack a hash using plain text file
+                  use -d if you used -g on the file]
+                  [-d crack a hash using a dictionary file (use -g to make one)
+                   no encryptions arguements needed]
 Example:
    python {0} -c md5 "c268120ce3918b1264fe2c05143b5c4b"
                   or
    python {0} -f pass.txt md5 "c268120ce3918b1264fe2c05143b5c4b"
+				 or
+   python {0} -d dictmd5c1.crack '61bad16b91c29a757f6b36c21a065197'
    '''.format(argv[0]))
    try:
       if (argv[1].lower() == '-c'):
@@ -279,18 +293,25 @@ Example:
             print("Found: %s" % crack_with_file(argv[2], argv[3].lower(), argv[4]))
          except IndexError:
             print(__help__)
+      elif argv[1].lower() == '-d':
+		  try:
+			  print("Found: %s" % crack_with_dict(argv[2], argv[3]))
+		  except IndexError:
+			  print(__help__)
       elif (argv[1].lower() == '-h'):
          print(__help__)
       else:
          print("try: python %s -h" % argv[0])
    except IndexError:
-      choix = input("1. Generate a dictionary\n2. Crack a password\n3. Crack a password using a file\n: ")
+      choix = input("1. Generate a dictionary\n2. Crack a password\n3. Crack a password using a file\n4. Crack a hash using a dictionary file\n: ")
       if (choix == 1):
          make_dict(raw_input("Encryption\nmd5, sha1, sha224, sha256, sha384, sha512\n: "))
       elif (choix == 2):
          print("Found: %s" % crack(raw_input("Encryption\nmd5, sha1, sha224, sha256, sha384, sha512\n: "), raw_input("Data to crack: ")))
-      else:
+      elif (choix == 3):
          print("Found: %s" % crack_with_file(raw_input("File name: "), raw_input("Encryption to crack: ").lower(), raw_input("Hash to crack: ")))
+      else:
+		  print("Found: %s" % crack_with_dict(raw_input("File name: "), raw_input("Hash to crack: ")))
 if __name__ == "__main__":
    print("""
                                               ,MD5
