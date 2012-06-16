@@ -220,7 +220,7 @@ def crack(encryption, hash_password, display=True):
       exit()
 
 def crack_with_dict(dict_name, to_crack):
-   try:
+	try:
 		file = open(dict_name, "r")
 	except IOError:
 		print("File not found: %s" % dict_name)
@@ -311,7 +311,7 @@ Example:
       elif (choix == 3):
          print("Found: %s" % crack_with_file(raw_input("File name: "), raw_input("Encryption to crack: ").lower(), raw_input("Hash to crack: ")))
       else:
-		  print("Found: %s" % crack_with_dict(raw_input("File name: "), raw_input("Hash to crack: ")))
+         print("Found: %s" % crack_with_dict(raw_input("File name: "), raw_input("Hash to crack: ")))
 if __name__ == "__main__":
    print("""
                                               ,MD5
