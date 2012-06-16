@@ -153,12 +153,12 @@ class brute_writer:
       try:
          mkdir('library')
       except:
-         print("\n[*] dir already created")
+         print("[*] dir already created")
       file = open("library/dict%sc%i.crack" % (self.encryption, self.brute.nombre_de_caracteres), "a")
       file.write("\n".join(self.tout_mots))
       file.close()
       self.tout_mots = []
-
+      
    def make(self, encryption):
       ''''''
       self.compteur += 1
@@ -179,7 +179,7 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
       try:
          if (m.brute.puissances[m.brute.nombre_de_carateres-1] == m.brute.nombre_de_mots):
                m.brute.nombre_de_carateres += 1
-         if (m.compteur >= 50000):
+         if (m.compteur >= 500000):
             #do a backup every x times
             m.on_save()
             m.compteur = 0
@@ -220,14 +220,15 @@ def crack(encryption, hash_password, display=True):
       exit()
 
 def crack_with_dict(dict_name, to_crack):
-	try:
-		file = open(dict_name, "r")
-	except IOError:
-		print("File not found: %s" % dict_name)
-	for ligne in file:
-		if ligne[ligne.find("\t")+1:].replace("\n", "") == to_crack:
-			return ligne[:ligne.find("\t")]
-	return ''
+    try:
+        file = open(dict_name, "r")
+    except IOError:
+        print("File not found: %s" % dict_name)
+        exit()
+    for ligne in file:
+        if ligne[ligne.find("\t")+1:].replace("\n", "") == to_crack:
+            return ligne[:ligne.find("\t")]
+    return ''
 
 def crack_with_file(file_name, encryption, hash_pass):
    brute = brute_force()
@@ -274,7 +275,7 @@ Example:
    python {0} -c md5 "c268120ce3918b1264fe2c05143b5c4b"
                   or
    python {0} -f pass.txt md5 "c268120ce3918b1264fe2c05143b5c4b"
-				 or
+                 or
    python {0} -d dictmd5c1.crack '61bad16b91c29a757f6b36c21a065197'
    '''.format(argv[0]))
    try:
@@ -294,10 +295,10 @@ Example:
          except IndexError:
             print(__help__)
       elif argv[1].lower() == '-d':
-                  try:
-                        print("Found: %s" % crack_with_dict(argv[2], argv[3]))
-		  except IndexError:
-                        print(__help__)
+          try:
+              print("Found: %s" % crack_with_dict(argv[2], argv[3]))
+          except IndexError:
+              print(__help__)
       elif (argv[1].lower() == '-h'):
          print(__help__)
       else:
