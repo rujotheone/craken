@@ -174,7 +174,7 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
    m = brute_writer(encryption, nombre_de_carateres_depart)
    if encryption not in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']:
       print("Encryption not found")
-      _exit(0)
+      return 1
    while (True):
       try:
          if (m.brute.puissances[m.brute.nombre_de_carateres-1] == m.brute.nombre_de_mots):
@@ -192,6 +192,7 @@ def make_dict(encryption, nombre_de_carateres_depart=1, display=True):
          print("\nKeyboard interrupt")
          m.on_save()
          sleep(5)
+   return 0
 
 def crack(encryption, hash_password, display=True):
    '''
@@ -204,7 +205,7 @@ def crack(encryption, hash_password, display=True):
    brute = brute_force(hash_password)
    if encryption not in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']:
       print("Encryption not found")
-      _exit(0)
+      return 1
    try:
       while (True):
          if (brute.puissances[brute.nombre_de_carateres-1] == brute.nombre_de_mots):
@@ -217,7 +218,7 @@ def crack(encryption, hash_password, display=True):
             stdout.flush()
    except KeyboardInterrupt:
       print("\nKeyboard Interrupt")
-      exit()
+      return 0
 
 def crack_with_dict(dict_name, to_crack):
     try:
@@ -235,7 +236,7 @@ def crack_with_file(file_name, encryption, hash_pass):
    encryption = encryption.lower()
    if encryption not in ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']:
       print("Encryption not found")
-      _exit(0)
+      return 1
    try:
       _file = open(file_name, "r")
    except IOError:
@@ -246,7 +247,7 @@ def crack_with_file(file_name, encryption, hash_pass):
       brute.dernier_mot_de_passe = ligne.replace("\n", "")
       if brute.encode(encryption) == hash_pass:
          return ligne.replace("\n", "")
-   print "Not found"
+   return 1
 
 def quitter():
    print("Exitted before found any correspondance")
