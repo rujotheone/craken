@@ -52,7 +52,7 @@ from time import sleep
 
 
 class brute_force:
-   def __init__(self, mot_de_passe_a_trouver='', nombre_de_carateres_depart = 1, caracteres_max=42):
+	def __init__(self, mot_de_passe_a_trouver='', nombre_de_carateres_depart = 1, caracteres_max=42):
 		'''
 		Librairie de recherche de mots de passes encrypte
 		Library for decrypting encrypted passwords
