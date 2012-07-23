@@ -10,7 +10,7 @@
 This is a simple hash code breaker wrote in python using hashlib
 to crack: md5, sha1, sha224, sha256, sha384, sha512
 
-To create library of random passwords to use "crack with file option" I made another script for that: https://github.com/mouuff/PyPasswordFinder
+To create library of random passwords to use "crack with file option"
 otherwise use the basic and long crack option
 
 new updates are coming!
