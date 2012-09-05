@@ -49,7 +49,7 @@ from os import _exit, mkdir
 from sys import stdout, argv
 from atexit import register
 from time import sleep
-
+from os import fsync, rename
 
 class brute_force:
 	def __init__(self, mot_de_passe_a_trouver='', nombre_de_carateres_depart = 1, caracteres_max=42):
@@ -152,10 +152,12 @@ class brute_writer:
 		'''Save the pass'''
 		try:
 			mkdir('library')
-		except:
+		except OSError:
 			print("\n[*] dir already created")
 		file = open("library/dict%sc%i.crack" % (self.encryption, self.brute.nombre_de_caracteres), "a")
 		file.write("\n".join(self.tout_mots))
+		file.flush()
+		fsync(file.fileno())
 		file.close()
 		self.tout_mots = []
 		
